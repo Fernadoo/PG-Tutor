@@ -1,4 +1,4 @@
-# .gitignore
+# general .gitignore
 __pycache__/
 *.pyc
 .DS_Store
@@ -6,3 +6,6 @@ __pycache__/
 venv/
 env/
 node_modules/
+
+# poject related
+record/
