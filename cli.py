@@ -18,7 +18,7 @@ from typing import Optional, Dict, Any
 # Add src directory to path so we can import our modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from teacher import AITeacher
+from teacher import AITeacher, LLMTeacher
 from knowledge_graph import KnowledgeGraph
 
 
@@ -83,13 +83,14 @@ def show_topic_content(topic) -> None:
     print("="*50 + "\n")
 
 
-def run_interactive_session(num_sessions: int = 5, no_prompt: bool = False):
+def run_interactive_session(num_sessions: int = 5, no_prompt: bool = False, llm_config: Optional[Dict[str, str]] = None):
     """
     Run an interactive tutoring session with the user as the student.
 
     Args:
         num_sessions: Number of topics to cover
         no_prompt: Skip "Press Enter" prompts for automated testing
+        llm_config: Configuration for LLMTeacher (api_key, base_url, model)
     """
     # Create timestamp for log files
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -125,7 +126,19 @@ def run_interactive_session(num_sessions: int = 5, no_prompt: bool = False):
 
     # Initialize components
     knowledge_graph = KnowledgeGraph()
-    teacher = AITeacher(knowledge_graph)
+    
+    teacher = None
+    if llm_config:
+        try:
+            log_message(f"Initializing LLM Teacher with model: {llm_config.get('model', 'default')}...")
+            teacher = LLMTeacher(knowledge_graph, **llm_config)
+            log_message("LLM Teacher initialized successfully.")
+        except Exception as e:
+            log_message(f"Error initializing LLM Teacher: {e}")
+            log_message("Falling back to standard AI Teacher.")
+    
+    if teacher is None:
+        teacher = AITeacher(knowledge_graph)
 
     # Start with level 0 topics
     current_level = 0
@@ -143,18 +156,50 @@ def run_interactive_session(num_sessions: int = 5, no_prompt: bool = False):
         log_message(f"SESSION {session_counter}/{num_sessions}")
         log_message("-"*60)
 
-        # Show topic and get feedback
-        while True:
-            feedback = get_user_feedback(current_topic.name, current_topic.difficulty)
-
-            if feedback == "show_content":
-                show_topic_content(current_topic)
-                # Log content view
-                log_message(f"User viewed content for: {current_topic.name}")
-                continue
-            else:
-                correct = feedback
+        correct = False
+        
+        if isinstance(teacher, LLMTeacher):
+            # LLM-based interaction
+            log_message(f"\nGenerating lesson for: {current_topic.name}...")
+            content = teacher.get_lesson_content(current_topic)
+            
+            log_message("\n" + "="*50)
+            log_message(f"TOPIC: {current_topic.name}")
+            log_message(f"LEVEL: {current_topic.level}")
+            log_message("\nLESSON:")
+            log_message(content)
+            log_message("="*50 + "\n")
+            
+            log_message("Please answer the question above (or ask for clarification):")
+            try:
+                user_input = input("> ").strip()
+                
+                log_message("\nEvaluating answer...")
+                evaluation = teacher.evaluate_student_response(current_topic, user_input)
+                
+                correct = evaluation.get('correct', False)
+                feedback = evaluation.get('feedback', "No feedback provided.")
+                
+                log_message("\nFEEDBACK:")
+                log_message(feedback)
+                
+            except KeyboardInterrupt:
+                log_message("\n\nSession interrupted.")
                 break
+        else:
+            # Standard interaction
+            # Show topic and get feedback
+            while True:
+                feedback = get_user_feedback(current_topic.name, current_topic.difficulty)
+
+                if feedback == "show_content":
+                    show_topic_content(current_topic)
+                    # Log content view
+                    log_message(f"User viewed content for: {current_topic.name}")
+                    continue
+                else:
+                    correct = feedback
+                    break
 
         # Teacher observes and updates belief
         teacher.observe_student_performance(current_topic, correct)
@@ -175,15 +220,16 @@ def run_interactive_session(num_sessions: int = 5, no_prompt: bool = False):
         session_data['sessions'].append(session_record)
         session_data['teacher_belief_history'].append(belief.copy())
 
-        # Provide feedback to user
-        log_message("\n" + "-"*30)
-        log_message("FEEDBACK")
-        log_message("-"*30)
-        if correct:
-            log_message("✓ Good work! You're mastering this topic.")
-        else:
-            log_message("✗ That's okay! Learning takes practice.")
-            log_message("   Consider reviewing the topic content again.")
+        # Provide feedback to user (only for standard mode, LLM already did it)
+        if not isinstance(teacher, LLMTeacher):
+            log_message("\n" + "-"*30)
+            log_message("FEEDBACK")
+            log_message("-"*30)
+            if correct:
+                log_message("✓ Good work! You're mastering this topic.")
+            else:
+                log_message("✗ That's okay! Learning takes practice.")
+                log_message("   Consider reviewing the topic content again.")
 
         # Show teacher's assessment
         log_message(f"\nTeacher's assessment:")
@@ -271,11 +317,27 @@ def main():
                        help='Starting level (optional, system will adapt automatically)')
     parser.add_argument('--no-prompt', action='store_true',
                        help='Skip "Press Enter" prompts for automated testing')
+    
+    # LLM arguments
+    parser.add_argument('--llm-key', type=str, default=os.environ.get('OPENAI_API_KEY'),
+                       help='OpenAI API Key (or set OPENAI_API_KEY env var)')
+    parser.add_argument('--llm-base', type=str, default=os.environ.get('OPENAI_BASE_URL'),
+                       help='OpenAI Base URL (optional)')
+    parser.add_argument('--model', type=str, default='gpt-3.5-turbo',
+                       help='Model name (default: gpt-3.5-turbo)')
 
     args = parser.parse_args()
 
+    llm_config = None
+    if args.llm_key:
+        llm_config = {
+            'api_key': args.llm_key,
+            'base_url': args.llm_base,
+            'model': args.model
+        }
+
     try:
-        run_interactive_session(args.sessions, args.no_prompt)
+        run_interactive_session(args.sessions, args.no_prompt, llm_config)
     except KeyboardInterrupt:
         print("\n\nSession interrupted by user. Goodbye!")
         sys.exit(0)

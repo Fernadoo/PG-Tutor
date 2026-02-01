@@ -7,6 +7,11 @@ based on Bayesian updates of student knowledge levels.
 
 import random
 import numpy as np
+import json
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
 from typing import List, Dict, Any, Optional
 from bayesian_model import BayesianKnowledgeModel
 from knowledge_graph import KnowledgeGraph, Topic
@@ -179,3 +184,100 @@ class AITeacher:
             return "Student has solid knowledge. Challenge with advanced topics."
         else:
             return "Student is demonstrating expert-level understanding. Consider specialized topics."
+
+
+class LLMTeacher(AITeacher):
+    """
+    LLM-based Teacher that uses a Large Language Model to interact with students.
+    """
+
+    def __init__(self, knowledge_graph: KnowledgeGraph, api_key: str, base_url: str = None,
+                 model: str = "gpt-3.5-turbo", initial_alpha: float = 1.0, initial_beta: float = 1.0):
+        """
+        Initialize the LLM teacher.
+
+        Args:
+            knowledge_graph: Knowledge graph containing topics
+            api_key: OpenAI API key
+            base_url: Optional base URL for API
+            model: Model name to use
+            initial_alpha: Initial shape parameter for Gamma prior
+            initial_beta: Initial rate parameter for Gamma prior
+        """
+        super().__init__(knowledge_graph, initial_alpha, initial_beta)
+        if OpenAI is None:
+            raise ImportError("The 'openai' library is required for LLMTeacher.")
+
+        self.client = OpenAI(api_key=api_key, base_url=base_url)
+        self.model = model
+
+    def get_lesson_content(self, topic: Topic) -> str:
+        """
+        Generate lesson content for a topic using LLM, adapted to student level.
+
+        Args:
+            topic: The topic to teach
+
+        Returns:
+            Generated lesson content string
+        """
+        student_level = self.bayesian_model.get_expected_lambda()
+        prompt = f"""
+        You are an AI Tutor teaching {topic.name} (Level {topic.level}).
+        The student's estimated skill level is {student_level:.2f} (on a scale of 0-5).
+        
+        Topic Description: {topic.content}
+        
+        Please provide a concise lesson explanation and a practice question suitable for this student's level.
+        The explanation should be clear and engaging.
+        The question should test their understanding of the concept.
+        """
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            return f"Error generating lesson content: {str(e)}\\n\\nDefault Content: {topic.content}"
+
+    def evaluate_student_response(self, topic: Topic, student_response: str) -> Dict[str, Any]:
+        """
+        Evaluate student's natural language response using LLM.
+
+        Args:
+            topic: The topic being tested
+            student_response: The student's answer
+
+        Returns:
+            Dictionary with 'correct' (bool) and 'feedback' (str)
+        """
+        prompt = f"""
+        Topic: {topic.name}
+        Topic Content: {topic.content}
+        Student Answer: {student_response}
+        
+        Evaluate if the student's answer is correct based on the topic.
+        Return a JSON object with:
+        - "correct": boolean (true if the answer demonstrates understanding, false otherwise)
+        - "feedback": string (brief, constructive feedback explaining why it's correct or incorrect)
+        """
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "You are a strict but helpful tutor. Output valid JSON only."},
+                    {"role": "user", "content": prompt}
+                ],
+                response_format={"type": "json_object"}
+            )
+            content = response.choices[0].message.content
+            return json.loads(content)
+        except Exception as e:
+            # Fallback for error or non-JSON response
+            return {
+                "correct": False,
+                "feedback": f"Could not evaluate response automatically. Error: {str(e)}"
+            }

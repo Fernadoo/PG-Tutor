@@ -22,7 +22,7 @@ This document contains records and notes for future development of the AI tutori
 - [ ] Add adaptive assessment system
 - [ ] Include spaced repetition scheduling
 - [ ] Implement personalized learning paths
-- [ ] Add natural language processing for question interpretation
+- [x] Add natural language processing for question interpretation (Implemented LLM Teacher)
 
 ### Phase 3: Deployment & Integration
 - [ ] Create web interface (React/Vue frontend)
@@ -47,9 +47,9 @@ This document contains records and notes for future development of the AI tutori
 - [ ] Add CI/CD pipeline
 
 ## Known Issues
-1. Cached Python bytecode files are included in git (should be excluded)
-2. CLI interface could benefit from better help text and error messages
-3. Student simulation could be more nuanced with topic-specific expertise
+- [x] Cached Python bytecode files are included in git (should be excluded)
+- [ ] CLI interface could benefit from better help text and error messages
+- [ ] Student simulation could be more nuanced with topic-specific expertise
 
 ## Development Guidelines
 
