@@ -15,6 +15,8 @@ import json
 import datetime
 from typing import Optional, Dict, Any
 
+import yaml
+
 # Add src directory to path so we can import our modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
@@ -317,23 +319,34 @@ def main():
                        help='Starting level (optional, system will adapt automatically)')
     parser.add_argument('--no-prompt', action='store_true',
                        help='Skip "Press Enter" prompts for automated testing')
+    parser.add_argument('--config', type=str, default='config.yaml',
+                       help='Path to configuration file (default: config.yaml)')
     
-    # LLM arguments
-    parser.add_argument('--llm-key', type=str, default=os.environ.get('OPENAI_API_KEY'),
-                       help='OpenAI API Key (or set OPENAI_API_KEY env var)')
-    parser.add_argument('--llm-base', type=str, default=os.environ.get('OPENAI_BASE_URL'),
-                       help='OpenAI Base URL (optional)')
-    parser.add_argument('--model', type=str, default='gpt-3.5-turbo',
-                       help='Model name (default: gpt-3.5-turbo)')
-
     args = parser.parse_args()
 
     llm_config = None
-    if args.llm_key:
+    
+    # Try to load configuration from YAML
+    if os.path.exists(args.config):
+        try:
+            with open(args.config, 'r') as f:
+                config = yaml.safe_load(f)
+                if config and 'llm' in config:
+                    llm_config = config['llm']
+                    # Ensure minimal requirements are met (api_key)
+                    if not llm_config.get('api_key'):
+                        print("Warning: 'api_key' missing in 'llm' section of config.yaml. LLM teacher disabled.")
+                        llm_config = None
+        except Exception as e:
+            print(f"Warning: Error loading config file: {e}")
+    
+    # Fallback to environment variables if config file didn't provide key
+    if llm_config is None and os.environ.get('OPENAI_API_KEY'):
+        print("Note: No valid config file found, using OPENAI_API_KEY from environment.")
         llm_config = {
-            'api_key': args.llm_key,
-            'base_url': args.llm_base,
-            'model': args.model
+            'api_key': os.environ.get('OPENAI_API_KEY'),
+            'base_url': os.environ.get('OPENAI_BASE_URL'),
+            'model': 'gpt-3.5-turbo'
         }
 
     try:
