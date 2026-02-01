@@ -8,6 +8,7 @@ based on Bayesian updates of student knowledge levels.
 import random
 import numpy as np
 import json
+import re
 try:
     from openai import OpenAI
 except ImportError:
@@ -208,6 +209,8 @@ class LLMTeacher(AITeacher):
         if OpenAI is None:
             raise ImportError("The 'openai' library is required for LLMTeacher.")
 
+        print(api_key, base_url)
+
         self.client = OpenAI(api_key=api_key, base_url=base_url)
         self.model = model
 
@@ -222,25 +225,38 @@ class LLMTeacher(AITeacher):
             Generated lesson content string
         """
         student_level = self.bayesian_model.get_expected_lambda()
-        prompt = f"""
+        system_prompt = f"""
         You are an AI Tutor teaching {topic.name} (Level {topic.level}).
         The student's estimated skill level is {student_level:.2f} (on a scale of 0-5).
         
         Topic Description: {topic.content}
         
+        总是用中文回复
+        """
+        
+        user_prompt = """
         Please provide a concise lesson explanation and a practice question suitable for this student's level.
         The explanation should be clear and engaging.
         The question should test their understanding of the concept.
         """
 
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[{"role": "user", "content": prompt}]
+            completion = self.client.chat.completions.create(
+                model=self.model, # 替换模型 id
+                messages=[
+                    {
+                    "role": "system",
+                    "content": system_prompt
+                    },    
+                    {
+                    "role": "user",
+                    "content": user_prompt
+                    }
+                ]
             )
-            return response.choices[0].message.content
+            return completion.choices[0].message.content
         except Exception as e:
-            return f"Error generating lesson content: {str(e)}\\n\\nDefault Content: {topic.content}"
+            return f"Error generating lesson content: {str(e)}\n\nDefault Content: {topic.content}"
 
     def evaluate_student_response(self, topic: Topic, student_response: str) -> Dict[str, Any]:
         """
@@ -253,10 +269,12 @@ class LLMTeacher(AITeacher):
         Returns:
             Dictionary with 'correct' (bool) and 'feedback' (str)
         """
-        prompt = f"""
+        system_prompt = f"""
         Topic: {topic.name}
         Topic Content: {topic.content}
         Student Answer: {student_response}
+        
+        总是用中文回复
         
         Evaluate if the student's answer is correct based on the topic.
         Return a JSON object with:
@@ -265,16 +283,24 @@ class LLMTeacher(AITeacher):
         """
 
         try:
-            response = self.client.chat.completions.create(
+            completion = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": "You are a strict but helpful tutor. Output valid JSON only."},
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": system_prompt}
                 ],
-                response_format={"type": "json_object"}
             )
-            content = response.choices[0].message.content
-            return json.loads(content)
+            content = completion.choices[0].message.content
+            print(content)
+            
+            # Extract JSON using regex
+            json_match = re.search(r'\{.*\}', content, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(0)
+                return json.loads(json_str)
+            else:
+                # If no JSON found, try to parse the whole content
+                return json.loads(content)
         except Exception as e:
             # Fallback for error or non-JSON response
             return {

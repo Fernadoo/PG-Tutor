@@ -165,6 +165,9 @@ def run_interactive_session(num_sessions: int = 5, no_prompt: bool = False, llm_
             log_message(f"\nGenerating lesson for: {current_topic.name}...")
             content = teacher.get_lesson_content(current_topic)
             
+            # Update topic content with the generated lesson so evaluation knows context
+            current_topic.content = content
+            
             log_message("\n" + "="*50)
             log_message(f"TOPIC: {current_topic.name}")
             log_message(f"LEVEL: {current_topic.level}")
