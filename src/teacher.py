@@ -54,8 +54,8 @@ class AITeacher:
             observation = topic.level + 1
         else:
             # Student struggled with the topic
-            # Failed answer suggests student might be at or below this level
-            observation = topic.level
+            # Failed answer suggests student might be below this level
+            observation = max(0, topic.level - 1)
 
         # Update the Bayesian model with this observation
         self.bayesian_model.update_belief(np.array([observation]))
@@ -82,9 +82,14 @@ class AITeacher:
         Returns:
             Next topic to present, or None if no suitable topic found
         """
-        # Determine how much to advance (1-2 levels deeper)
-        # We'll randomly choose between advancing 1 or 2 levels
-        levels_ahead = random.randint(1, 2)
+        # Determine how much to advance based on current level
+        # If current_level is very low (beginner), we should be more conservative
+        if current_level <= 1:
+            # For beginners, only advance 1 level at most
+            levels_ahead = 1
+        else:
+            # For more advanced students, can advance 1-2 levels
+            levels_ahead = random.randint(1, 2)
 
         # Get potential topics from the next few levels
         next_level_topics = self.knowledge_graph.get_next_level_topics(
