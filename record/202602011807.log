@@ -1,0 +1,239 @@
+============================================================
+              AI TUTORING SYSTEM
+============================================================
+
+Welcome! I'll be your AI tutor today.
+I'll ask you questions and adapt to your learning progress.
+Based on your answers, I'll adjust the difficulty level.
+
+Let's get started!
+
+------------------------------------------------------------
+SESSION 1/5
+------------------------------------------------------------
+
+Topic: Variables and Expressions
+Difficulty: 0.30/1.0
+Did you answer correctly?
+1. Yes
+2. No
+3. Partially (some correct)
+4. Show topic content
+
+Enter your choice (1-4): 4
+
+==================================================
+TOPIC: Variables and Expressions
+LEVEL: 0
+DIFFICULTY: 0.30/1.0
+
+CONTENT:
+Understanding variables and evaluating expressions
+
+PREREQUISITES:
+  None (introductory topic)
+==================================================
+
+
+Topic: Variables and Expressions
+Difficulty: 0.30/1.0
+Did you answer correctly?
+1. Yes
+2. No
+3. Partially (some correct)
+4. Show topic content
+
+Enter your choice (1-4): 1
+
+------------------------------
+FEEDBACK
+------------------------------
+✓ Good work! You're mastering this topic.
+
+Teacher's assessment:
+  Estimated knowledge level: 0.50
+  Recommendation: Student seems to be at a beginner level. Start with foundational topics.
+
+Next topic: Introduction to Algebra
+  Level: 0
+  Difficulty: 0.20/1.0
+
+Press Enter to continue to next session...
+
+
+------------------------------------------------------------
+SESSION 2/5
+------------------------------------------------------------
+
+Topic: Introduction to Algebra
+Difficulty: 0.20/1.0
+Did you answer correctly?
+1. Yes
+2. No
+3. Partially (some correct)
+4. Show topic content
+
+Enter your choice (1-4): 1
+
+------------------------------
+FEEDBACK
+------------------------------
+✓ Good work! You're mastering this topic.
+
+Teacher's assessment:
+  Estimated knowledge level: 0.50
+  Recommendation: Student seems to be at a beginner level. Start with foundational topics.
+
+Next topic: Introduction to Algebra
+  Level: 0
+  Difficulty: 0.20/1.0
+
+Press Enter to continue to next session...
+
+
+------------------------------------------------------------
+SESSION 3/5
+------------------------------------------------------------
+
+Topic: Introduction to Algebra
+Difficulty: 0.20/1.0
+Did you answer correctly?
+1. Yes
+2. No
+3. Partially (some correct)
+4. Show topic content
+
+Enter your choice (1-4): 1
+
+------------------------------
+FEEDBACK
+------------------------------
+✓ Good work! You're mastering this topic.
+
+Teacher's assessment:
+  Estimated knowledge level: 0.50
+  Recommendation: Student seems to be at a beginner level. Start with foundational topics.
+
+Next topic: Introduction to Algebra
+  Level: 0
+  Difficulty: 0.20/1.0
+
+Press Enter to continue to next session...
+
+
+------------------------------------------------------------
+SESSION 4/5
+------------------------------------------------------------
+
+Topic: Introduction to Algebra
+Difficulty: 0.20/1.0
+Did you answer correctly?
+1. Yes
+2. No
+3. Partially (some correct)
+4. Show topic content
+
+Enter your choice (1-4): 2
+
+------------------------------
+FEEDBACK
+------------------------------
+✗ That's okay! Learning takes practice.
+   Consider reviewing the topic content again.
+
+Teacher's assessment:
+  Estimated knowledge level: 0.50
+  Recommendation: Student seems to be at a beginner level. Start with foundational topics.
+
+Next topic: Variables and Expressions
+  Level: 0
+  Difficulty: 0.30/1.0
+
+Press Enter to continue to next session...
+
+
+------------------------------------------------------------
+SESSION 5/5
+------------------------------------------------------------
+
+Topic: Variables and Expressions
+Difficulty: 0.30/1.0
+Did you answer correctly?
+============================================================
+Press Enter to continue to next session...
+
+
+Press Enter to continue to next session...
+------------------------------
+
+4. Show topic content
+Difficulty: 0.30/1.0
+Did you answer correctly?
+1. Yes
+1. Yes
+2. No
+
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+3. Partially (some correct)
+4. Show topic content
+
+Enter your choice (1-4): 3
+Treating partial correctness as needs more practice.
+
+------------------------------
+FEEDBACK
+------------------------------
+✗ That's okay! Learning takes practice.
+   Consider reviewing the topic content again.
+
+Teacher's assessment:
+  Estimated knowledge level: 0.50
+  Recommendation: Student seems to be at a beginner level. Start with foundational topics.
+
+Next topic: Introduction to Algebra
+  Level: 0
+  Difficulty: 0.20/1.0
+
+============================================================
+SESSION COMPLETE
+============================================================
+Total sessions: 5
+Your accuracy: 60.00%
+Final estimated level: 0.50
+
+Keep practicing! You're building a strong foundation.
+
+Thank you for learning with the AI Tutoring System!
+============================================================

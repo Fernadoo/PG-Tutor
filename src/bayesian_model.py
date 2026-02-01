@@ -53,8 +53,8 @@ class BayesianKnowledgeModel:
         sum_x = np.sum(observations)
 
         # Gamma posterior update: Gamma(α + Σx_i, β + n)
-        self.posterior_alpha = self.alpha + sum_x
-        self.posterior_beta = self.beta + n
+        self.posterior_alpha = self.posterior_alpha + sum_x
+        self.posterior_beta = self.posterior_beta + n
 
         # Store history for visualization
         self.lambda_history.append(self.get_expected_lambda())
