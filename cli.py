@@ -83,12 +83,13 @@ def show_topic_content(topic) -> None:
     print("="*50 + "\n")
 
 
-def run_interactive_session(num_sessions: int = 5):
+def run_interactive_session(num_sessions: int = 5, no_prompt: bool = False):
     """
     Run an interactive tutoring session with the user as the student.
 
     Args:
         num_sessions: Number of topics to cover
+        no_prompt: Skip "Press Enter" prompts for automated testing
     """
     # Create timestamp for log files
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -102,6 +103,7 @@ def run_interactive_session(num_sessions: int = 5):
     session_data = {
         'timestamp': timestamp,
         'num_sessions': num_sessions,
+        'no_prompt': no_prompt,
         'sessions': [],
         'final_summary': None,
         'teacher_belief_history': []
@@ -209,7 +211,7 @@ def run_interactive_session(num_sessions: int = 5):
                 log_message(f"Review topic: {current_topic.name}")
 
         # Show progress
-        if session_counter < num_sessions:
+        if session_counter < num_sessions and not no_prompt:
             log_message("\nPress Enter to continue to next session...")
             try:
                 input()
@@ -267,11 +269,13 @@ def main():
                        help='Number of tutoring sessions (default: 5)')
     parser.add_argument('--level', type=int, default=None,
                        help='Starting level (optional, system will adapt automatically)')
+    parser.add_argument('--no-prompt', action='store_true',
+                       help='Skip "Press Enter" prompts for automated testing')
 
     args = parser.parse_args()
 
     try:
-        run_interactive_session(args.sessions)
+        run_interactive_session(args.sessions, args.no_prompt)
     except KeyboardInterrupt:
         print("\n\nSession interrupted by user. Goodbye!")
         sys.exit(0)

@@ -50,10 +50,12 @@ class AITeacher:
         # In a more sophisticated model, we'd have a more nuanced mapping
         if correct:
             # Student demonstrated mastery of the topic
-            observation = topic.level
+            # Successful answer suggests student can handle this level
+            observation = topic.level + 1
         else:
             # Student struggled with the topic
-            observation = max(0, topic.level - 1)
+            # Failed answer suggests student might be at or below this level
+            observation = topic.level
 
         # Update the Bayesian model with this observation
         self.bayesian_model.update_belief(np.array([observation]))
@@ -99,8 +101,18 @@ class AITeacher:
         if accessible_topics:
             return random.choice(accessible_topics)
         else:
-            # If no topics are available, return a topic from the current level
-            return self.knowledge_graph.get_random_topic_at_level(current_level)
+            # If no topics are available at next level, try topics at current level
+            current_level_topics = self.knowledge_graph.get_topics_at_level(current_level)
+            if current_level_topics:
+                return random.choice(current_level_topics)
+            else:
+                # If no topics at current level, try any available topics
+                all_levels = self.knowledge_graph.get_all_levels()
+                for level in all_levels:
+                    topics = self.knowledge_graph.get_topics_at_level(level)
+                    if topics:
+                        return random.choice(topics)
+                return None
 
     def get_current_belief(self) -> Dict[str, Any]:
         """
@@ -152,11 +164,13 @@ class AITeacher:
             Text recommendation for the teacher
         """
         lambda_estimate = self.bayesian_model.get_expected_lambda()
-        if lambda_estimate < 1.0:
-            return "Student seems to be at a beginner level. Start with foundational topics."
+        if lambda_estimate < 0.5:
+            return "Student is at a beginner level. Focus on foundational concepts."
+        elif lambda_estimate < 1.5:
+            return "Student is progressing well with basic topics."
         elif lambda_estimate < 2.5:
             return "Student is developing intermediate skills. Progress to more complex concepts."
-        elif lambda_estimate < 4.0:
+        elif lambda_estimate < 3.5:
             return "Student has solid knowledge. Challenge with advanced topics."
         else:
-            return "Student demonstrates expert-level knowledge. Introduce cutting-edge concepts."
+            return "Student is demonstrating expert-level understanding. Consider specialized topics."

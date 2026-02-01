@@ -168,9 +168,9 @@ class KnowledgeGraph:
         if not topic:
             return False
 
-        # For simplicity, we'll assume the student can handle any topic at or below their level
+        # For simplicity, we'll assume the student can handle topics at their level or one level above
         # In a more sophisticated model, we'd check specific prerequisites
-        return topic.level <= student_level
+        return topic.level <= student_level + 1
 
     def get_topic_difficulty(self, topic_name: str) -> float:
         """
