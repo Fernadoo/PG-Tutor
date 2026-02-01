@@ -1,0 +1,14 @@
+# LLM Configuration
+llm:
+  # OpenAI API Key (required for LLM teacher)
+  api_key: "sk-..."
+  
+  # Base URL (optional, e.g. for local models or proxies)
+  base_url: "https://aihubmix.com/v1"
+  
+  # Model name
+  model: "DeepSeek-V3"
+  
+  # Initial Bayesian priors (optional)
+  # initial_alpha: 1.0
+  # initial_beta: 1.0
