@@ -1,9 +1,13 @@
 # LLM Configuration
+# NOTE: API credentials are now entered through the web interface for better security.
+# This file only provides default values for base_url and model.
 llm:
-  # OpenAI API Key (required for LLM teacher)
-  api_key: "sk-..."
+  # OpenAI API Key - DO NOT STORE HERE
+  # Enter your API key in the web interface instead (stored only in memory)
+  # api_key: "sk-..."
   
   # Base URL (optional, e.g. for local models or proxies)
+  # Default: https://api.openai.com/v1
   base_url: "https://aihubmix.com/v1"
   
   # Model name
